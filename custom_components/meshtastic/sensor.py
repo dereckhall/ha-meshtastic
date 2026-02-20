@@ -80,6 +80,7 @@ async def async_unload_entry(
 class MeshtasticSensorEntityDescription(SensorEntityDescription):
     exists_fn: Callable[[MeshtasticSensor], bool] = lambda _: True
     value_fn: Callable[[MeshtasticSensor], StateType]
+    attr_fn: Callable[[MeshtasticSensor], dict[str, Any] | None] = lambda _: None
 
 
 class MeshtasticSensor(MeshtasticNodeEntity, SensorEntity):
@@ -99,6 +100,9 @@ class MeshtasticSensor(MeshtasticNodeEntity, SensorEntity):
         LOGGER.debug("Updating sensor attributes: %s", self)
         self._attr_native_value = self.entity_description.value_fn(self)
         self._attr_available = self._attr_native_value is not None
+        extra_attrs = self.entity_description.attr_fn(self)
+        if extra_attrs is not None:
+            self._attr_extra_state_attributes = extra_attrs
 
 
 def _build_node_sensors(
@@ -325,6 +329,27 @@ def _build_device_sensors(
     return entities
 
 
+_ONLINE_THRESHOLD_SECONDS = 2 * 60 * 60  # 2 hours, matches Meshtastic firmware default
+
+
+def _online_nodes_attributes(device: MeshtasticSensor) -> dict[str, Any]:
+    now = datetime.datetime.now(tz=datetime.UTC).timestamp()
+    online_nodes: list[str] = []
+    for node_id, node_data in device.coordinator.data.items():
+        last_heard = node_data.get("lastHeard")
+        if last_heard is None:
+            continue
+        if (now - last_heard) > _ONLINE_THRESHOLD_SECONDS:
+            continue
+        long_name = node_data.get("user", {}).get("longName")
+        short_name = node_data.get("user", {}).get("shortName")
+        name = long_name or short_name or f"!{node_id:08x}"
+        last_heard_dt = datetime.datetime.fromtimestamp(last_heard, tz=datetime.UTC)
+        online_nodes.append(f"{name} (last heard: {last_heard_dt.strftime('%Y-%m-%d %H:%M:%S UTC')})")
+    online_nodes.sort()
+    return {"online_nodes": online_nodes}
+
+
 def _build_local_stats_sensors(
     nodes: Mapping[int, Mapping[str, Any]], runtime_data: MeshtasticData
 ) -> Iterable[MeshtasticSensor]:
@@ -453,6 +478,7 @@ def _build_local_stats_sensors(
                     value_fn=lambda device: device.coordinator.data[device.node_id]
                     .get("localStats", {})
                     .get("numOnlineNodes", None),
+                    attr_fn=_online_nodes_attributes,
                 ),
                 gateway=gateway,
                 node_id=node_id,
