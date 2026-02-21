@@ -197,6 +197,10 @@ class MeshtasticApiClient:
     def get_node_info(self, node_id: int) -> MeshNode | None:
         return self._interface.find_node(node_id=node_id)
 
+    def get_all_nodes_raw(self) -> Mapping[int, Mapping[str, Any]]:
+        """Return the full unfiltered node database from the mesh interface."""
+        return self._interface.nodes()
+
     async def async_get_all_nodes(self) -> Mapping[int, Mapping[str, Any]]:
         await self._interface.connected_node_ready()
         return {node_id: self._transform_node_info(node_info) for node_id, node_info in self._interface.nodes().items()}
