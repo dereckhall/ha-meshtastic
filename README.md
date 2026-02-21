@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 [![License][license-shield]](LICENSE)
 
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories)
-[![HA Analytics](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fanalytics.home-assistant.io%2Fcustom_integrations.json&query=%24.meshtastic.total&style=for-the-badge&label=Active%20Installations&color=red)](https://buymeacoffee.com/broglep)
 
 
 _Home Assistant Integration for [Meshtastic](https://www.meshtastic.org)._
@@ -22,6 +21,7 @@ Supported Features:
    * Home Assistant Zeroconf, Bluetooth & USB-Serial Auto-Discovery 
    * Select which meshtastic nodes should be imported to home assistant
  * Meshtastic node metrics
+ * Online Nodes sensor includes an expandable list of all online node names with last heard timestamps (nodes heard within the last 2 hours)
  * Record received messages
  * Send messages (as direct message or on broadcast channel)
  * Record node position (as device tracker)
@@ -36,7 +36,7 @@ For more details, see check the [documentation](#documentation).
 
 ### Recommended: [HACS](https://www.hacs.xyz)
 
-1. Add this repository as a custom repository to HACS: [![Add Repository](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=meshtastic&repository=home-assistant&category=integration)
+1. Add this repository as a custom repository to HACS: [![Add Repository](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=dereckhall&repository=ha-meshtastic&category=integration)
 2. Use HACS to install the integration.
 3. Restart Home Assistant.
 4. Set up the integration using the UI: [![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=meshtastic)
@@ -311,9 +311,9 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ***
 
-[commits-shield]: https://img.shields.io/github/commit-activity/y/meshtastic/home-assistant.svg?style=for-the-badge
-[commits]: https://github.com/meshtastic/home-assistant/commits/main
-[license-shield]: https://img.shields.io/github/license/meshtastic/home-assistant.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/meshtastic/home-assistant.svg?style=for-the-badge
-[releases]: https://github.com/meshtastic/home-assistant/releases
+[commits-shield]: https://img.shields.io/github/commit-activity/y/dereckhall/ha-meshtastic.svg?style=for-the-badge
+[commits]: https://github.com/dereckhall/ha-meshtastic/commits/main
+[license-shield]: https://img.shields.io/github/license/dereckhall/ha-meshtastic.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/dereckhall/ha-meshtastic.svg?style=for-the-badge
+[releases]: https://github.com/dereckhall/ha-meshtastic/releases
 
