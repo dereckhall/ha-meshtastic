@@ -335,7 +335,11 @@ _ONLINE_THRESHOLD_SECONDS = 2 * 60 * 60  # 2 hours, matches Meshtastic firmware 
 def _online_nodes_attributes(device: MeshtasticSensor) -> dict[str, Any]:
     now = datetime.datetime.now(tz=datetime.UTC).timestamp()
     online_nodes: list[str] = []
-    for node_id, node_data in device.coordinator.data.items():
+    try:
+        all_nodes = device.coordinator.config_entry.runtime_data.client._interface.nodes()
+    except Exception:
+        all_nodes = device.coordinator.data
+    for node_id, node_data in all_nodes.items():
         last_heard = node_data.get("lastHeard")
         if last_heard is None:
             continue
