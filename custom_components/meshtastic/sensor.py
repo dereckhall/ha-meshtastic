@@ -338,7 +338,8 @@ def _online_nodes_attributes(device: MeshtasticSensor) -> dict[str, Any]:
     try:
         all_nodes = device.coordinator.config_entry.runtime_data.client._interface.nodes()
     except Exception:
-        all_nodes = device.coordinator.data
+        LOGGER.debug("Failed to get nodes from interface for online list", exc_info=True)
+        all_nodes = {}
     for node_id, node_data in all_nodes.items():
         last_heard = node_data.get("lastHeard")
         if last_heard is None:
