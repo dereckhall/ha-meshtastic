@@ -352,7 +352,24 @@ def _online_nodes_attributes(device: MeshtasticSensor) -> dict[str, Any]:
         last_heard_dt = datetime.datetime.fromtimestamp(last_heard, tz=datetime.UTC)
         online_nodes.append(f"{name} (last heard: {last_heard_dt.strftime('%Y-%m-%d %H:%M:%S UTC')})")
     online_nodes.sort()
-    return {"online_nodes": online_nodes}
+
+    # Diagnostic: show ALL nodes in the interface database regardless of lastHeard
+    all_nodes_debug: list[str] = []
+    for node_id, node_data in all_nodes.items():
+        long_name = node_data.get("user", {}).get("longName")
+        short_name = node_data.get("user", {}).get("shortName")
+        name = long_name or short_name or f"!{node_id:08x}"
+        last_heard = node_data.get("lastHeard")
+        if last_heard is not None and last_heard > 0:
+            last_heard_dt = datetime.datetime.fromtimestamp(last_heard, tz=datetime.UTC)
+            age_s = now - last_heard
+            age_m = int(age_s // 60)
+            all_nodes_debug.append(f"{name} (lastHeard: {last_heard_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}, {age_m}m ago)")
+        else:
+            all_nodes_debug.append(f"{name} (lastHeard: NONE)")
+    all_nodes_debug.sort()
+
+    return {"online_nodes": online_nodes, "all_known_nodes": all_nodes_debug, "node_db_count": len(all_nodes)}
 
 
 def _build_local_stats_sensors(
