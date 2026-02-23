@@ -828,6 +828,13 @@ class MeshInterface:
             await self._connection.request_config(minimal=self.no_nodes)
             self._connected_node_ready.set()
 
+    async def refresh_node_database(self) -> None:
+        """Re-request config from firmware to refresh node lastHeard values."""
+        if not self._connected_node_ready.is_set():
+            return
+        async with self._connected_node_config_lock:
+            await self._connection.request_config(minimal=self.no_nodes)
+
     def _add_background_task(self, coro: Awaitable[None], name: str | None = None) -> asyncio.Task:
         task = asyncio.create_task(coro, name=name)
         self._background_tasks.add(task)

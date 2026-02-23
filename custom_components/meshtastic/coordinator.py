@@ -81,7 +81,7 @@ class MeshtasticDataUpdateCoordinator(DataUpdateCoordinator):
             hass=hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(hours=1),
+            update_interval=timedelta(minutes=30),
         )
         self._logger = LOGGER.getChild(self.__class__.__name__)
         self._remove_event_listeners = []
@@ -184,6 +184,7 @@ class MeshtasticDataUpdateCoordinator(DataUpdateCoordinator):
             return None
 
         try:
+            await self.config_entry.runtime_data.client.async_refresh_nodes()
             node_infos = await self.config_entry.runtime_data.client.async_get_all_nodes()
 
             filter_nodes = self.config_entry.options.get(CONF_OPTION_FILTER_NODES, [])
