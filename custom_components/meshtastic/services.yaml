@@ -136,3 +136,5 @@ request_traceroute:
       selector:
         device:
           integration: meshtastic
+
+refresh_nodes:

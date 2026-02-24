@@ -45,6 +45,7 @@ from .const import (
     SERVICE_BROADCAST_CHANNEL_MESSAGE,
     SERVICE_REQUEST_POSITION,
     SERVICE_REQUEST_TELEMETRY,
+    SERVICE_REFRESH_NODES,
     SERVICE_REQUEST_TRACEROUTE,
     SERVICE_SEND_DIRECT_MESSAGE,
     SERVICE_SEND_TEXT,
@@ -96,6 +97,7 @@ SERVICE_REQUEST_TELEMETRY_SCHEMA = SERVICE_BASE_REQUEST_SCHEMA.extend(
 
 SERVICE_REQUEST_POSITION_SCHEMA = SERVICE_BASE_REQUEST_SCHEMA.extend({})
 SERVICE_REQUEST_TRACEROUTE_SCHEMA = SERVICE_BASE_REQUEST_SCHEMA.extend({})
+SERVICE_REFRESH_NODES_SCHEMA = vol.Schema({})
 
 _SERVICE_CANT_HANDLE_RESPONSE = object()
 _service_handlers: dict[str, dict[str, Callable[[ServiceCall], Awaitable[ServiceResponse]]]] = defaultdict(dict)
@@ -107,6 +109,7 @@ SUPPORTED_SERVICES = {
     SERVICE_REQUEST_TELEMETRY: SupportsResponse.OPTIONAL,
     SERVICE_REQUEST_POSITION: SupportsResponse.OPTIONAL,
     SERVICE_REQUEST_TRACEROUTE: SupportsResponse.OPTIONAL,
+    SERVICE_REFRESH_NODES: SupportsResponse.NONE,
 }
 
 SERVICE_TO_SCHEMA = {
@@ -116,6 +119,7 @@ SERVICE_TO_SCHEMA = {
     SERVICE_REQUEST_TELEMETRY: SERVICE_REQUEST_TELEMETRY_SCHEMA,
     SERVICE_REQUEST_POSITION: SERVICE_REQUEST_POSITION_SCHEMA,
     SERVICE_REQUEST_TRACEROUTE: SERVICE_REQUEST_TRACEROUTE_SCHEMA,
+    SERVICE_REFRESH_NODES: SERVICE_REFRESH_NODES_SCHEMA,
 }
 
 
@@ -163,6 +167,7 @@ async def async_register_gateway(hass: HomeAssistant, entry: MeshtasticConfigEnt
     await _setup_service_request_telemetry_handler(hass, entry, client)
     await _setup_service_request_position_handler(hass, entry, client)
     await _setup_service_request_traceroute_handler(hass, entry, client)
+    _setup_service_refresh_nodes_handler(entry, client)
 
 
 async def async_unregister_gateway(hass: HomeAssistant, entry: MeshtasticConfigEntry) -> None:
@@ -360,3 +365,12 @@ async def _setup_service_send_text_handler(
         )
 
     _service_handlers[entry.entry_id][SERVICE_SEND_TEXT] = await _build_default_handler(hass, client, handler)
+
+
+def _setup_service_refresh_nodes_handler(
+    entry: MeshtasticConfigEntry, client: MeshtasticApiClient
+) -> None:
+    async def handle_service_call(call: ServiceCall) -> None:  # noqa: ARG001
+        await client.async_refresh_nodes()
+
+    _service_handlers[entry.entry_id][SERVICE_REFRESH_NODES] = handle_service_call
