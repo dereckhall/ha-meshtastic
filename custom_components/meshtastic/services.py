@@ -371,6 +371,9 @@ def _setup_service_refresh_nodes_handler(
     entry: MeshtasticConfigEntry, client: MeshtasticApiClient
 ) -> None:
     async def handle_service_call(call: ServiceCall) -> None:  # noqa: ARG001
-        await client.async_refresh_nodes()
+        success = await client.async_refresh_nodes()
+        if not success:
+            msg = "Could not refresh nodes: connection to device is not available. Try again later."
+            raise HomeAssistantError(msg)
 
     _service_handlers[entry.entry_id][SERVICE_REFRESH_NODES] = handle_service_call

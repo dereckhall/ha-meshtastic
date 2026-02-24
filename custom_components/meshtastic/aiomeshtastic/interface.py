@@ -828,12 +828,20 @@ class MeshInterface:
             await self._connection.request_config(minimal=self.no_nodes)
             self._connected_node_ready.set()
 
-    async def refresh_node_database(self) -> None:
-        """Re-request config from firmware to refresh node lastHeard values."""
+    async def refresh_node_database(self) -> bool:
+        """Re-request config from firmware to refresh node lastHeard values.
+
+        Returns True if the refresh succeeded, False if the connection was unavailable.
+        """
         if not self._connected_node_ready.is_set():
-            return
-        async with self._connected_node_config_lock:
-            await self._connection.request_config(minimal=self.no_nodes)
+            return False
+        try:
+            async with self._connected_node_config_lock:
+                await self._connection.request_config(minimal=self.no_nodes)
+            return True
+        except ClientApiNotConnectedError:
+            self._logger.debug("Cannot refresh node database: connection not available")
+            return False
 
     def _add_background_task(self, coro: Awaitable[None], name: str | None = None) -> asyncio.Task:
         task = asyncio.create_task(coro, name=name)

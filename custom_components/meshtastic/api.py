@@ -201,10 +201,13 @@ class MeshtasticApiClient:
         await self._interface.connected_node_ready()
         return {node_id: self._transform_node_info(node_info) for node_id, node_info in self._interface.nodes().items()}
 
-    async def async_refresh_nodes(self) -> None:
-        """Re-request node database from firmware to refresh lastHeard values."""
+    async def async_refresh_nodes(self) -> bool:
+        """Re-request node database from firmware to refresh lastHeard values.
+
+        Returns True if the refresh succeeded, False if the connection was unavailable.
+        """
         await self._interface.connected_node_ready()
-        await self._interface.refresh_node_database()
+        return await self._interface.refresh_node_database()
 
     def _transform_node_info(self, node_info: Mapping[str, Any]) -> Mapping[str, Any]:
         transformed = deepcopy(node_info)
