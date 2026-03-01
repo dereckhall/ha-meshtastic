@@ -140,7 +140,7 @@ class MeshtasticApiClient:
 
     async def connect(self) -> None:
         try:
-            await asyncio.wait_for(self._interface.start(), timeout=30)
+            await asyncio.wait_for(self._interface.start(), timeout=120)
         except Exception as e:
             raise MeshtasticApiClientCommunicationError from e
 

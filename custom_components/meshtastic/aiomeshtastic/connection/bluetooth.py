@@ -45,7 +45,7 @@ class BluetoothConnection(ClientApiConnection):
         ble_address: str,
         ble_device: Any | None = None,
         bleak_client_backend: type[BaseBleakClient] | None = None,
-        connect_timeout: float = 10.0,
+        connect_timeout: float = 90.0,
     ) -> None:
         super().__init__()
         self._ble_address = ble_address
