@@ -350,7 +350,12 @@ def _online_nodes_attributes(device: MeshtasticSensor) -> dict[str, Any]:
         short_name = node_data.get("user", {}).get("shortName")
         name = long_name or short_name or f"!{node_id:08x}"
         last_heard_dt = datetime.datetime.fromtimestamp(last_heard, tz=datetime.UTC)
-        online_nodes.append(f"{name} (last heard: {last_heard_dt.strftime('%Y-%m-%d %H:%M:%S UTC')})")
+        hops_away = node_data.get("hopsAway")
+        heard_str = last_heard_dt.strftime('%Y-%m-%d %H:%M:%S UTC')
+        if hops_away is not None:
+            online_nodes.append(f"{name} (hops: {hops_away}, last heard: {heard_str})")
+        else:
+            online_nodes.append(f"{name} (last heard: {heard_str})")
     online_nodes.sort()
     return {"online_nodes": online_nodes}
 
