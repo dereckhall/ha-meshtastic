@@ -101,9 +101,9 @@ async def async_setup_entry(
         registered_entity_id = entity_registry.async_get_entity_id(
             platform.domain, platform.platform_name, entity.unique_id
         )
-        if registered_entity_id is None or registered_entity_id not in platform.domain_entities:
+        if registered_entity_id is None:
             async_add_entities([entity])
-        else:
+        elif registered_entity_id in platform.domain_entities:
             existing_entity = platform.domain_entities[registered_entity_id]
             if existing_entity.name != entity.name:
                 existing_entity.update_from(entity)
@@ -132,9 +132,9 @@ async def _add_node_entities(
     new_entities = []
     for e in entities:
         registered_entity_id = entity_registry.async_get_entity_id(platform.domain, platform.platform_name, e.unique_id)
-        if registered_entity_id is None or registered_entity_id not in platform.domain_entities:
+        if registered_entity_id is None:
             new_entities.append(e)
-        else:
+        elif registered_entity_id in platform.domain_entities:
             existing_entity = platform.domain_entities[registered_entity_id]
             if existing_entity.name != e.name:
                 existing_entity.update_from(e)
@@ -175,9 +175,9 @@ async def _add_channel_entities(
     new_entities = []
     for e in entities:
         registered_entity_id = entity_registry.async_get_entity_id(platform.domain, platform.platform_name, e.unique_id)
-        if registered_entity_id is None or registered_entity_id not in platform.domain_entities:
+        if registered_entity_id is None:
             new_entities.append(e)
-        else:
+        elif registered_entity_id in platform.domain_entities:
             existing_entity = platform.domain_entities[registered_entity_id]
             existing_entity.update_from(e)
 

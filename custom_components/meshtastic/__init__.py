@@ -431,12 +431,18 @@ async def _add_entities_for_entry(hass: HomeAssistant, entities: list[Entity], e
     entity_registry = er.async_get(hass)
     device_registry = dr.async_get(hass)
 
-    await hass.data[DATA_COMPONENT].async_add_entities(entities)
-    # attach entities to config entry (as async_add_entities does not support apply config_entry_id from entities)
+    # Filter out entities whose unique ID is already registered to avoid duplicate ID errors on reload
+    new_entities = []
     for e in entities:
-        if e.entity_id is None:
-            LOGGER.debug("Skipping entity update for %s — entity was not registered (possible duplicate unique ID)", e)
-            continue
+        existing = entity_registry.async_get_entity_id(DOMAIN, DOMAIN, e.unique_id)
+        if existing is not None:
+            LOGGER.debug("Entity with unique ID %s already registered as %s, skipping", e.unique_id, existing)
+        else:
+            new_entities.append(e)
+
+    await hass.data[DATA_COMPONENT].async_add_entities(new_entities)
+    # attach entities to config entry (as async_add_entities does not support apply config_entry_id from entities)
+    for e in new_entities:
         device_id = UNDEFINED
         if e.device_info:
             device = device_registry.async_get_device(identifiers=e.device_info["identifiers"])
