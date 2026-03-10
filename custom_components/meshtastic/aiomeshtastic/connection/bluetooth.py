@@ -62,11 +62,27 @@ class BluetoothConnection(ClientApiConnection):
         self._force_read_event = asyncio.Event()
 
     async def _connect(self) -> None:
-        target = self._ble_device if self._ble_device is not None else self._ble_address
-        self._bleak_client = BleakClient(
-            target, timeout=self._connect_timeout, backend=self._bleak_client_backend
-        )
-        await self._bleak_client.connect()
+        if self._ble_device is not None:
+            try:
+                from bleak_retry_connector import establish_connection
+
+                self._bleak_client = await establish_connection(
+                    client_class=BleakClient,
+                    device=self._ble_device,
+                    name=self._ble_address,
+                    max_attempts=3,
+                )
+            except ImportError:
+                self._logger.warning("bleak-retry-connector not available, falling back to direct connection")
+                self._bleak_client = BleakClient(
+                    self._ble_device, timeout=self._connect_timeout, backend=self._bleak_client_backend
+                )
+                await self._bleak_client.connect()
+        else:
+            self._bleak_client = BleakClient(
+                self._ble_address, timeout=self._connect_timeout, backend=self._bleak_client_backend
+            )
+            await self._bleak_client.connect()
 
         # attempt pairing, we don't know if it is required. Should not harm if
         # not needed. if pairing is required, external input is necessary as we are not
