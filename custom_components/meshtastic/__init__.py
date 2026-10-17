@@ -431,12 +431,18 @@ async def _add_entities_for_entry(hass: HomeAssistant, entities: list[Entity], e
     entity_registry = er.async_get(hass)
     device_registry = dr.async_get(hass)
 
-    # Filter out entities whose unique ID is already registered to avoid duplicate ID errors on reload
+    # Skip entities that are currently loaded to avoid duplicate ID errors on reload. Being in the entity
+    # registry is not enough: registry entries persist across restarts, so skipping those never recreates them.
+    component = hass.data[DATA_COMPONENT]
     new_entities = []
+    seen_unique_ids = set()
     for e in entities:
+        if e.unique_id in seen_unique_ids:
+            continue
+        seen_unique_ids.add(e.unique_id)
         existing = entity_registry.async_get_entity_id(DOMAIN, DOMAIN, e.unique_id)
-        if existing is not None:
-            LOGGER.debug("Entity with unique ID %s already registered as %s, skipping", e.unique_id, existing)
+        if existing is not None and component.get_entity(existing) is not None:
+            LOGGER.debug("Entity with unique ID %s already loaded as %s, skipping", e.unique_id, existing)
         else:
             new_entities.append(e)
 
