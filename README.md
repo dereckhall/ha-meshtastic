@@ -36,6 +36,8 @@ For more details, see check the [documentation](#documentation).
 
 This fork tracks [meshtastic/home-assistant](https://github.com/meshtastic/home-assistant) with fixes on top. Notable ones:
 
+ * **0.6.14** – Pass the device `model_id` (hardware model number) as a string. HA warns about the int value and rejects it from 2026.12.
+   Remaining HA deprecation warnings, not yet fixed: `device_registry.async_get_device` and `DeviceEntry.config_entries` (stop working in 2027.8 / 2027.10), `CONCENTRATION_MICROGRAMS_PER_CUBIC_METER` (2027.8), and the device tracker overriding `battery_level` (2027.7).
  * **0.6.13** – Finish the switch to `pyserial-asyncio-fast`. 0.6.12 changed only the manifest requirement; `aiomeshtastic/connection/serial.py` still imported `serial_asyncio`. Home Assistant 2026.10 no longer ships the old `pyserial-asyncio` package, so the import failed, and because `aiomeshtastic/__init__.py` suppresses that `ImportError`, the integration failed to load with the misleading error `cannot import name 'SerialConnection' from 'custom_components.meshtastic.aiomeshtastic'`. `serial.py` now imports `serial_asyncio_fast` (as upstream PR #150 does) and `requirements.txt` lists `pyserial-asyncio-fast`.
  * **0.6.12** – Requirement `pyserial-asyncio` → `pyserial-asyncio-fast` (HA 2026.7 deprecation warning).
  * Duplicate entity registration on config entry reload fixed; entity registry update skipped for unregistered entities.
