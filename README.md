@@ -32,6 +32,18 @@ Supported Features:
 
 For more details, see check the [documentation](#documentation).
 
+## Fork changes (dereckhall/ha-meshtastic)
+
+This fork tracks [meshtastic/home-assistant](https://github.com/meshtastic/home-assistant) with fixes on top. Notable ones:
+
+ * **0.6.13** – Finish the switch to `pyserial-asyncio-fast`. 0.6.12 changed only the manifest requirement; `aiomeshtastic/connection/serial.py` still imported `serial_asyncio`. Home Assistant 2026.10 no longer ships the old `pyserial-asyncio` package, so the import failed, and because `aiomeshtastic/__init__.py` suppresses that `ImportError`, the integration failed to load with the misleading error `cannot import name 'SerialConnection' from 'custom_components.meshtastic.aiomeshtastic'`. `serial.py` now imports `serial_asyncio_fast` (as upstream PR #150 does) and `requirements.txt` lists `pyserial-asyncio-fast`.
+ * **0.6.12** – Requirement `pyserial-asyncio` → `pyserial-asyncio-fast` (HA 2026.7 deprecation warning).
+ * Duplicate entity registration on config entry reload fixed; entity registry update skipped for unregistered entities.
+ * Bluetooth: `bleak-retry-connector` for connecting, longer timeouts for large node databases, ESPHome Bluetooth proxy fix.
+ * Online Nodes sensor attributes list all online node names with last heard time and hop count, built from the unfiltered node list.
+ * Node database refreshed from the firmware every 30 minutes, plus a `refresh_nodes` service for on-demand refresh.
+ * MQTT proxy uses the right default port when TLS is enabled.
+
 ## Installation
 
 ### Recommended: [HACS](https://www.hacs.xyz)
